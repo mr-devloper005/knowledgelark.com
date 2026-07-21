@@ -139,26 +139,28 @@ const hashStr = (value: string) => {
 const ratingOf = (post: SitePost) => {
   const real = Number(getContent(post).rating)
   if (real >= 1 && real <= 5) return Math.round(real * 10) / 10
-  return Math.round((3.7 + (hashStr(post.slug || post.id || post.title || 'x') % 13) / 10) * 10) / 10
+  return 0
 }
 const reviewsOf = (post: SitePost) => {
   const real = Number(getContent(post).reviewCount ?? getContent(post).reviews)
   if (real > 0) return Math.floor(real)
-  return 6 + (hashStr((post.slug || post.title || 'x') + 'r') % 480)
+  return 0
 }
 
 function DetailMeta({ post, category, center = false }: { post: SitePost; category?: string; center?: boolean }) {
   const rating = ratingOf(post)
   const filled = Math.round(rating)
+  const reviews = reviewsOf(post)
+  if (!rating && !category) return null
   return (
     <div className={`mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 ${center ? 'justify-center' : ''}`}>
-      <span className="inline-flex items-center gap-[3px]">
+      {rating ? <span className="inline-flex items-center gap-[3px]">
         {[0, 1, 2, 3, 4].map((i) => (
           <Star key={i} className={`h-[18px] w-[18px] ${i < filled ? 'fill-[var(--tk-accent)] text-[var(--tk-accent)]' : 'fill-[var(--tk-line)] text-[var(--tk-line)]'}`} />
         ))}
-      </span>
-      <span className="text-sm font-semibold text-[var(--tk-text)]">{rating.toFixed(1)}</span>
-      <span className="text-sm text-[var(--tk-muted)]">{reviewsOf(post)} reviews</span>
+      </span> : null}
+      {rating ? <span className="text-sm font-semibold text-[var(--tk-text)]">{rating.toFixed(1)}</span> : null}
+      {reviews ? <span className="text-sm text-[var(--tk-muted)]">{reviews} reviews</span> : null}
       {category ? (
         <>
           <span className="h-1 w-1 rounded-full bg-[var(--tk-muted)] opacity-50" />
@@ -194,9 +196,10 @@ function ArticleDetail({ post, related, comments }: { post: SitePost; related: S
   const images = getImages(post)
   return (
     <>
-      <article className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
+      <section className="bg-[linear-gradient(180deg,#30295f_0%,#24113e_320px,#f7f7fb_320px)] px-4 py-14 sm:py-20">
+      <article className="mx-auto max-w-4xl rounded-[1.5rem] border border-[var(--tk-line)] bg-white px-6 py-10 shadow-[0_24px_70px_rgba(24,13,58,.16)] sm:px-10 sm:py-14">
         <BackLink task="article" />
-        <p className="mt-10 text-xs font-medium uppercase tracking-[0.28em] text-[var(--tk-accent)]">{categoryOf(post, 'Article')}</p>
+        <div className="mt-10 inline-flex rounded-full bg-[var(--tk-accent-soft)] px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[var(--tk-accent)]">{categoryOf(post, 'Article')}</div>
         <h1 className="editable-display mt-5 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-[3.4rem]">{post.title}</h1>
         <div className="mt-6 text-sm text-[var(--tk-muted)]">
           <span>{SITE_CONFIG.name}</span>
@@ -204,7 +207,7 @@ function ArticleDetail({ post, related, comments }: { post: SitePost; related: S
         {images[0] ? <img src={images[0]} alt="" className="mt-10 aspect-[16/9] w-full rounded-[var(--tk-radius)] border border-[var(--tk-line)] object-cover" /> : null}
         <BodyContent post={post} />
         <EditableArticleComments slug={post.slug} comments={comments} />
-      </article>
+      </article></section>
       <RelatedStrip task="article" related={related} />
     </>
   )
@@ -220,16 +223,17 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
   const website = getField(post, ['website', 'url'])
   const mapSrc = mapSrcFor(post)
   return (
-    <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-8">
+    <section className="bg-[linear-gradient(180deg,#30295f_0%,#24113e_260px,#f7f7fb_260px)] px-4 py-14 sm:py-20">
+      <div className="mx-auto max-w-[var(--editable-container)] rounded-[1.5rem] border border-[var(--tk-line)] bg-white px-6 py-8 shadow-[0_24px_70px_rgba(24,13,58,.16)] lg:px-8">
       <BackLink task="listing" />
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
         <article className="min-w-0">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-6 rounded-2xl border border-[var(--tk-line)] bg-[linear-gradient(135deg,#f9f8ff,#fff5ec)] p-6 sm:flex-row sm:items-center sm:p-8">
             <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-raised)]">
               {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-12 w-12 text-[var(--tk-muted)]" />}
             </div>
             <div className="min-w-0">
-              <Kicker task="listing">Business listing</Kicker>
+              <Kicker task="listing">Business profile</Kicker>
               <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.04] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
               <DetailMeta post={post} category={getField(post, ['category'])} />
             </div>
@@ -242,9 +246,9 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
         </article>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           {mapSrc ? <MapBox src={mapSrc} label={address || post.title} /> : null}
-          <ContactAction website={website} phone={phone} email={email} />
           <RelatedPanel task="listing" post={post} related={related} />
         </aside>
+      </div>
       </div>
     </section>
   )
@@ -567,4 +571,3 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
     </Link>
   )
 }
-
