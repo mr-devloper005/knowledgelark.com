@@ -26,8 +26,8 @@ body {
 
 .editable-site-root {
   /* Yelp-style clean sans, used for both display and body. */
-  --editable-font-display: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  --editable-font-body: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --editable-font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --editable-font-body: 'Inter', system-ui, sans-serif;
   /* Premium easing curve used across every hover + transition. */
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   font-family: var(--editable-font-body);
@@ -97,9 +97,20 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--slot4-accent-fill) 28%, transparent);
-  color: var(--slot4-page-text);
+  background: #ff9b50;
+  color: #21153e;
 }
+
+.brand-orbit { position:relative; display:inline-flex; width:30px; height:30px; flex:none; border-radius:50%; background:linear-gradient(145deg,#ffd06a 0 46%,#ff7d43 47% 70%,#f2465d 71%); transform:rotate(18deg); box-shadow:0 0 0 4px rgba(255,255,255,.06) }
+.brand-orbit span { position:absolute; right:3px; top:2px; width:13px; height:23px; border-radius:50%; background:#30295f; transform:rotate(-15deg) }
+
+@keyframes editable-marquee { to { transform:translateX(-50%) } }
+@keyframes editable-float { 0%,100% { transform:translateY(0) rotate(-1deg) } 50% { transform:translateY(-10px) rotate(1deg) } }
+@keyframes editable-glow { 0%,100% { opacity:.35; transform:scale(.96) } 50% { opacity:.62; transform:scale(1.06) } }
+.editable-marquee { display:flex; width:max-content; animation:editable-marquee 34s linear infinite }
+.editable-marquee:hover { animation-play-state:paused }
+.editable-float { animation:editable-float 6s ease-in-out infinite }
+.editable-glow { animation:editable-glow 5s ease-in-out infinite }
 
 ::-webkit-scrollbar-track {
   background: color-mix(in oklab, var(--slot4-page-bg) 88%, black);
