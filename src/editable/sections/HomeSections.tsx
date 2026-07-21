@@ -63,15 +63,14 @@ function ratingOf(post: SitePost) {
   const content = post?.content && typeof post.content === 'object' ? (post.content as Record<string, unknown>) : {}
   const real = Number(content.rating)
   if (real >= 1 && real <= 5) return Math.round(real * 10) / 10
-  const h = hashStr(post.slug || post.id || post.title || 'x')
-  return Math.round((3.7 + (h % 13) / 10) * 10) / 10 // 3.7 – 4.9
+  return 0
 }
 
 function reviewsOf(post: SitePost) {
   const content = post?.content && typeof post.content === 'object' ? (post.content as Record<string, unknown>) : {}
   const real = Number(content.reviewCount ?? content.reviews)
   if (real > 0) return Math.floor(real)
-  return 6 + (hashStr((post.slug || post.title || 'x') + 'r') % 480)
+  return 0
 }
 
 function Stars({ rating, className = 'h-4 w-4' }: { rating: number; className?: string }) {
@@ -90,11 +89,13 @@ function Stars({ rating, className = 'h-4 w-4' }: { rating: number; className?: 
 
 function RatingRow({ post }: { post: SitePost }) {
   const rating = ratingOf(post)
+  if (!rating) return null
+  const reviews = reviewsOf(post)
   return (
     <div className="mt-2 flex items-center gap-2">
       <Stars rating={rating} className="h-4 w-4" />
       <span className="text-sm font-semibold text-[var(--slot4-page-text)]">{rating.toFixed(1)}</span>
-      <span className="text-sm text-[var(--slot4-muted-text)]">({reviewsOf(post)})</span>
+      {reviews ? <span className="text-sm text-[var(--slot4-muted-text)]">({reviews})</span> : null}
     </div>
   )
 }
@@ -134,37 +135,37 @@ export function EditableHomeHero({ primaryTask, primaryRoute, posts, timeSection
   const pool = dedupePosts([...posts, ...timeSections.flatMap((section) => section.posts)])
   const heroImages = latestPostImages(pool)
   const heroTitle = pagesContent.home.hero.title?.join(' ') || `Discover the best of ${SITE_CONFIG.name}`
-  const categories = SITE_CONFIG.tasks.filter((task) => task.enabled).slice(0, 6)
+  const categories = SITE_CONFIG.tasks.filter((task) => task.enabled && task.key !== 'classified' && task.key !== 'article').slice(0, 6)
 
   return (
-    <section className="relative">
-      <div className="relative h-[440px] w-full overflow-hidden sm:h-[520px] lg:h-[560px]">
+    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#332c67,#24113e_68%,#180324)]">
+      <div className="editable-glow pointer-events-none absolute -right-40 -top-48 h-[560px] w-[560px] rounded-full bg-[#ff9445]/20 blur-3xl" />
+      <div className="relative min-h-[520px] w-full overflow-hidden sm:min-h-[580px]">
         <EditableHeroCollage images={heroImages} />
-        <div className="absolute inset-0 bg-black/25" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.5)_45%,rgba(0,0,0,0.2)_100%)]" />
-        <div className={`relative flex h-full flex-col justify-center ${container}`}>
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/80">{pagesContent.home.hero.badge || 'Welcome'}</p>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,#2e255f_0%,rgba(37,18,66,.94)_58%,rgba(25,4,38,.72))]" />
+        <div className={`relative flex min-h-[520px] flex-col items-center justify-center py-16 text-center sm:min-h-[580px] ${container}`}>
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#ffad61]">{pagesContent.home.hero.badge || 'Knowledge meets local discovery'}</p>
             <h1 className="mt-3 text-balance text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl lg:text-6xl">
               {heroTitle}
             </h1>
-            <p className="mt-4 max-w-xl text-base text-white/90 sm:text-lg">{pagesContent.home.hero.description}</p>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">{pagesContent.home.hero.description}</p>
 
-            <form action="/search" className="mt-7 flex w-full max-w-xl overflow-hidden rounded-full bg-white shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+            <form action="/search" className="mx-auto mt-8 flex w-full max-w-2xl overflow-hidden rounded-xl bg-white p-1.5 shadow-[0_18px_55px_rgba(10,2,30,.38)]">
               <div className="flex flex-1 items-center gap-2.5 px-5">
                 <Search className="h-5 w-5 shrink-0 text-[var(--slot4-muted-text)]" />
                 <input
                   name="q"
-                  placeholder="Search posts, places, topics…"
+                  placeholder="Search businesses, categories, and local services"
                   className="w-full bg-transparent py-4 text-sm text-[var(--slot4-page-text)] outline-none placeholder:text-[var(--slot4-muted-text)]"
                 />
               </div>
-              <button className="shrink-0 bg-[var(--slot4-accent)] px-6 text-sm font-bold text-white transition hover:brightness-95 sm:px-8">
+              <button className="shrink-0 rounded-lg bg-[#ff9445] px-6 text-sm font-bold text-[#21163c] transition hover:bg-[#ffa75f] sm:px-8">
                 Search
               </button>
             </form>
 
-            <div className="mt-6 flex flex-wrap gap-2.5">
+            <div className="mt-6 flex flex-wrap justify-center gap-2.5">
               {categories.map((task) => (
                 <Link
                   key={task.key}
@@ -198,7 +199,7 @@ export function EditableHomeHero({ primaryTask, primaryRoute, posts, timeSection
 
 /* -------------------------- Browse by category -------------------------- */
 export function EditableStoryRail({ primaryRoute }: HomeSectionProps) {
-  const categories = SITE_CONFIG.tasks.filter((task) => task.enabled)
+  const categories = SITE_CONFIG.tasks.filter((task) => task.enabled && task.key !== 'classified' && task.key !== 'article')
   if (!categories.length) return null
   return (
     <section className="bg-[var(--slot4-surface-bg)]">
@@ -260,7 +261,7 @@ function ActivityCard({ post, href }: { post: SitePost; href: string }) {
         <RatingRow post={post} />
         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-6 text-[var(--slot4-muted-text)]">{getExcerpt(post, 140)}</p>
         <Link href={href} className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[var(--slot4-accent)] hover:underline">
-          Read more
+          View details
         </Link>
       </div>
       <div className="flex items-center gap-6 border-t border-[var(--editable-border)] px-4 py-3 text-[var(--slot4-muted-text)]">
@@ -281,7 +282,7 @@ export function EditableMagazineSplit({ primaryTask, primaryRoute, posts, timeSe
         <div className="text-center">
           <h2 className="text-3xl font-extrabold tracking-[-0.01em] sm:text-4xl">Recent activity</h2>
           <p className="mx-auto mt-3 max-w-2xl text-[var(--slot4-muted-text)]">
-            The latest posts, reviews and finds from across {SITE_CONFIG.name}.
+            Fresh businesses and useful services recently added to {SITE_CONFIG.name}.
           </p>
         </div>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -377,19 +378,22 @@ export function EditableTimeCollections({ primaryTask, primaryRoute, posts, time
 /* -------------------------------- CTA band ------------------------------ */
 export function EditableHomeCta() {
   return (
-    <section id="get-app" className="scroll-mt-24 bg-[var(--slot4-accent)]">
-      <div className={`flex flex-col items-center gap-6 py-16 text-center sm:py-20 ${container}`}>
+    <section id="get-app" className="relative scroll-mt-24 overflow-hidden bg-[linear-gradient(135deg,#332c67_0%,#24113e_68%,#180324_100%)]">
+      <div className="editable-glow pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-[#ff9445]/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-[#7468d7]/20 blur-3xl" />
+      <div className={`relative flex flex-col items-center gap-6 py-16 text-center sm:py-20 ${container}`}>
+        <span className="h-1 w-14 rounded-full bg-[#ff9445]" />
         <h2 className="max-w-2xl text-3xl font-extrabold tracking-[-0.01em] text-white sm:text-4xl">
-          Got something worth sharing?
+          Put your business where people can find it.
         </h2>
-        <p className="max-w-xl text-base text-white/90 sm:text-lg">
-          Add your business, post a listing, or share a story — and reach the {SITE_CONFIG.name} community.
+        <p className="max-w-xl text-base text-white/70 sm:text-lg">
+          Create a clear business listing and help customers discover what you offer on {SITE_CONFIG.name}.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/create" className="inline-flex items-center gap-2 rounded-lg bg-white px-7 py-3 text-sm font-bold text-[var(--slot4-accent)] transition hover:brightness-95">
-            Create a post
+          <Link href="/create" className="inline-flex items-center gap-2 rounded-lg bg-[#ff9445] px-7 py-3 text-sm font-bold text-[#21163c] transition hover:-translate-y-0.5 hover:bg-[#ffa75f]">
+            Create a listing
           </Link>
-          <Link href="/contact" className="inline-flex items-center gap-2 rounded-lg border border-white/60 px-7 py-3 text-sm font-bold text-white transition hover:bg-white/10">
+          <Link href="/contact" className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/5 px-7 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-[#ffad61] hover:bg-white/10">
             Contact us
           </Link>
         </div>

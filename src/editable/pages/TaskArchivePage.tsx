@@ -110,29 +110,29 @@ export function TaskArchiveView({ task, posts, pagination, category, basePath }:
   return (
     <EditableSiteShell>
       <main style={taskThemeStyle(task)} className="min-h-screen bg-[var(--tk-bg)] text-[var(--tk-text)]">
-        <header className="relative overflow-hidden border-b border-[var(--tk-line)]">
-          <div className="pointer-events-none absolute inset-x-0 -top-40 h-96 bg-[radial-gradient(60%_60%_at_50%_0%,var(--tk-glow),transparent_70%)]" />
+        <header className={`relative overflow-hidden border-b border-[var(--tk-line)] ${task === 'listing' || task === 'article' ? 'bg-[linear-gradient(135deg,#332c67,#24113e_72%,#180324)] text-white' : ''}`}>
+          <div className="pointer-events-none absolute inset-x-0 -top-40 h-96 bg-[radial-gradient(60%_60%_at_50%_0%,rgba(255,148,69,.22),transparent_70%)]" />
           <div className="relative mx-auto max-w-[var(--editable-container)] px-6 py-20 sm:py-28 lg:px-8">
             <div className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.34em] text-[var(--tk-accent)]">
               <span>{theme.kicker}</span>
               <span className="h-1 w-1 rounded-full bg-[var(--tk-accent)] opacity-50" />
-              <span className="text-[var(--tk-muted)]">{label}</span>
+              <span className={task === 'listing' || task === 'article' ? 'text-white/60' : 'text-[var(--tk-muted)]'}>{label}</span>
             </div>
             <h1 className="editable-display mt-6 max-w-3xl text-balance text-[2.5rem] font-semibold leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
               {voice?.headline || `Browse ${label}`}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--tk-muted)]">{voice?.description || theme.note}</p>
+            <p className={`mt-6 max-w-2xl text-lg leading-8 ${task === 'listing' || task === 'article' ? 'text-white/70' : 'text-[var(--tk-muted)]'}`}>{voice?.description || theme.note}</p>
             {voice?.chips?.length ? (
               <div className="mt-8 flex flex-wrap gap-2.5">
                 {voice.chips.map((chip) => (
-                  <span key={chip} className="rounded-full border border-[var(--tk-line)] bg-[var(--tk-surface)] px-3.5 py-1.5 text-xs font-medium text-[var(--tk-muted)]">{chip}</span>
+                  <span key={chip} className={`rounded-full border px-3.5 py-1.5 text-xs font-medium ${task === 'listing' || task === 'article' ? 'border-white/15 bg-white/10 text-white/75' : 'border-[var(--tk-line)] bg-[var(--tk-surface)] text-[var(--tk-muted)]'}`}>{chip}</span>
                 ))}
               </div>
             ) : null}
 
             <div className="mt-12 flex flex-col gap-4 border-t border-[var(--tk-line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-[var(--tk-muted)]">
-                <span className="font-semibold text-[var(--tk-text)]">{posts.length}</span> {posts.length === 1 ? 'post' : 'posts'} · {categoryLabel}
+              <p className={`text-sm ${task === 'listing' || task === 'article' ? 'text-white/65' : 'text-[var(--tk-muted)]'}`}>
+                <span className={`font-semibold ${task === 'listing' || task === 'article' ? 'text-white' : 'text-[var(--tk-text)]'}`}>{posts.length}</span> {posts.length === 1 ? 'result' : 'results'} · {categoryLabel}
               </p>
               <form action={basePath} className="flex items-center gap-2.5">
                 <div className="relative">
@@ -209,16 +209,18 @@ const hashStr = (value: string) => {
 const ratingOf = (post: SitePost) => {
   const real = Number(getContent(post).rating)
   if (real >= 1 && real <= 5) return Math.round(real * 10) / 10
-  return Math.round((3.7 + (hashStr(post.slug || post.id || post.title || 'x') % 13) / 10) * 10) / 10
+  return 0
 }
 const reviewsOf = (post: SitePost) => {
   const real = Number(getContent(post).reviewCount ?? getContent(post).reviews)
   if (real > 0) return Math.floor(real)
-  return 6 + (hashStr((post.slug || post.title || 'x') + 'r') % 480)
+  return 0
 }
 
 function RatingLine({ post, center = false }: { post: SitePost; center?: boolean }) {
   const rating = ratingOf(post)
+  if (!rating) return null
+  const reviews = reviewsOf(post)
   const filled = Math.round(rating)
   return (
     <div className={`mt-2.5 flex items-center gap-2 ${center ? 'justify-center' : ''}`}>
@@ -228,7 +230,7 @@ function RatingLine({ post, center = false }: { post: SitePost; center?: boolean
         ))}
       </span>
       <span className="text-sm font-semibold text-[var(--tk-text)]">{rating.toFixed(1)}</span>
-      <span className="text-sm text-[var(--tk-muted)]">({reviewsOf(post)})</span>
+      {reviews ? <span className="text-sm text-[var(--tk-muted)]">({reviews})</span> : null}
     </div>
   )
 }
@@ -237,8 +239,8 @@ function ArticleArchiveCard({ post, href, index }: { post: SitePost; href: strin
   const image = getImage(post)
   const category = getCategory(post, 'Article')
   return (
-    <Link href={href} className={`${cardBase} overflow-hidden`}>
-      <div className="aspect-[16/10] overflow-hidden bg-[var(--tk-raised)]">
+    <Link href={href} className={`${cardBase} overflow-hidden ${index === 0 ? 'md:col-span-2 xl:col-span-2 xl:grid xl:grid-cols-[1.15fr_.85fr]' : ''}`}>
+      <div className={`overflow-hidden bg-[var(--tk-raised)] ${index === 0 ? 'aspect-[16/10] xl:aspect-auto xl:min-h-80' : 'aspect-[16/10]'}`}>
         <img src={image} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
       </div>
       <div className="p-6 sm:p-7">
@@ -261,12 +263,14 @@ function ListingArchiveCard({ post, href }: { post: SitePost; href: string }) {
   const phone = getField(post, ['phone', 'telephone', 'mobile'])
   const website = getField(post, ['website', 'url'])
   return (
-    <Link href={href} className={`${cardBase} flex items-center gap-5 p-5 sm:p-6`}>
-      <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-[var(--tk-line)] bg-[var(--tk-raised)]">
+    <Link href={href} className={`${cardBase} relative flex flex-col items-start gap-5 overflow-hidden p-5 sm:flex-row sm:items-center sm:p-6`}>
+      <span className="absolute inset-y-0 left-0 w-1 bg-[var(--tk-accent)]" />
+      <div className="flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-[var(--tk-line)] bg-[var(--tk-raised)] shadow-sm sm:h-28 sm:w-28">
         {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <BriefcaseBusiness className="h-9 w-9 text-[var(--tk-muted)]" />}
       </div>
       <div className="min-w-0 flex-1">
-        <h2 className="editable-display truncate text-xl font-semibold tracking-[-0.02em]">{post.title}</h2>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--tk-accent)]">Business listing</p>
+        <h2 className="editable-display line-clamp-2 text-xl font-semibold tracking-[-0.02em]">{post.title}</h2>
         <RatingLine post={post} />
         <p className="mt-2 line-clamp-1 text-sm leading-6 text-[var(--tk-muted)]">{getSummary(post)}</p>
         <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium text-[var(--tk-muted)]">
@@ -275,7 +279,7 @@ function ListingArchiveCard({ post, href }: { post: SitePost; href: string }) {
           {website ? <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-[var(--tk-accent)]" /> Website</span> : null}
         </div>
       </div>
-      <ArrowUpRight className="h-5 w-5 shrink-0 text-[var(--tk-muted)] transition group-hover:text-[var(--tk-accent)]" />
+      <ArrowUpRight className="absolute bottom-5 right-5 h-5 w-5 shrink-0 text-[var(--tk-muted)] transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--tk-accent)] sm:static" />
     </Link>
   )
 }

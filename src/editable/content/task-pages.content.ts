@@ -11,12 +11,12 @@ export type TaskPageVoice = {
 
 export const taskPageVoices = {
   article: {
-    eyebrow: 'Reading desk',
-    headline: 'Long-form articles with a calmer editorial rhythm.',
-    description: 'Use this page for essays, guides, explainers, and story-led posts. The layout should feel like a publication, not a directory.',
+    eyebrow: 'KnowledgeLark journal',
+    headline: 'Helpful ideas, guides, and perspectives worth your time.',
+    description: 'Explore practical explainers and thoughtful guides with a clear, comfortable reading experience.',
     filterLabel: 'Choose article topic',
-    secondaryNote: 'Reading surfaces need space, hierarchy, and fewer distractions.',
-    chips: ['Editorial pacing', 'Topic filters', 'Long-read friendly'],
+    secondaryNote: 'Clear ideas, carefully organized.',
+    chips: ['Practical guides', 'Fresh perspectives', 'Easy reading'],
   },
   classified: {
     eyebrow: 'Notice board',
@@ -52,11 +52,11 @@ export const taskPageVoices = {
   },
   listing: {
     eyebrow: 'Business directory',
-    headline: 'Business listings built for discovery and comparison.',
-    description: 'Listing pages should behave like a directory with trust cues, metadata, and a practical search rhythm.',
+    headline: 'Find businesses and services that fit your needs.',
+    description: 'Browse useful details, compare local options, and connect directly with businesses from one clear directory.',
     filterLabel: 'Filter business category',
-    secondaryNote: 'Prioritize comparison, location, and direct action paths.',
-    chips: ['Directory', 'Compare', 'Business discovery'],
+    secondaryNote: 'Search, compare, and connect with confidence.',
+    chips: ['Local services', 'Useful details', 'Direct contact'],
   },
   image: {
     eyebrow: 'Visual gallery',

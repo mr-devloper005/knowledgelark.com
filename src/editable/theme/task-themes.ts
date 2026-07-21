@@ -32,24 +32,24 @@ export type TaskTheme = {
   radius: string
 }
 
-const YELP_FONT = "'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+const YELP_FONT = "'Plus Jakarta Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
 
 // Shared Yelp palette — every task inherits this; only kicker/note differ.
 const base = {
   dark: false,
   fontDisplay: YELP_FONT,
   fontBody: YELP_FONT,
-  bg: '#ffffff',
+  bg: '#f7f7fb',
   surface: '#ffffff',
-  raised: '#f7f7f7',
-  text: '#1a1a1a',
-  muted: '#6b6b6b',
-  line: '#e6e6e6',
-  accent: '#d32323',
-  accentSoft: '#fdecec',
-  onAccent: '#ffffff',
-  glow: 'rgba(211,35,35,0.06)',
-  radius: '0.75rem',
+  raised: '#f0eff8',
+  text: '#211d3f',
+  muted: '#716d86',
+  line: '#e3e0ee',
+  accent: '#f27c32',
+  accentSoft: '#fff0e4',
+  onAccent: '#24183e',
+  glow: 'rgba(76,60,145,0.12)',
+  radius: '1rem',
 } satisfies Omit<TaskTheme, 'kicker' | 'note'>
 
 export const taskThemes: Record<TaskKey, TaskTheme> = {
